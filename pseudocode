@@ -1,0 +1,26 @@
+Procedure ButterflyBarrier(process_rank: INTEGER, total_processes: INTEGER)
+    message_out: INTEGER := 1                  
+    message_in: INTEGER                        
+    stages: INTEGER := log₂(total_processes)   
+
+    for current_stage from 0 to (stages - 1) do
+        partner_process := process_rank XOR (2^current_stage)
+
+        MPI_Sendrecv(
+            send_buf := message_out,
+            send_count := 1,
+            send_type := MPI_INTEGER,
+            dest := partner_process,
+            send_tag := current_stage,
+            recv_buf := message_in,
+            recv_count := 1,
+            recv_type := MPI_INTEGER,
+            source := partner_process,
+            recv_tag := current_stage,
+            comm := MPI_COMM_WORLD,
+            status := status
+        )
+    end for
+
+    MPI_Barrier(MPI_COMM_WORLD)
+End Procedure
